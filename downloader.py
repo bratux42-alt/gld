@@ -28,23 +28,18 @@ class Downloader:
         loop = asyncio.get_event_loop()
         
         ydl_opts = {
-            # Выбираем лучший формат, где видео и аудио уже вместе (progressive), предпочтительно mp4
-            'format': 'best[ext=mp4]/best',
+            # Для сервера (с FFmpeg) выбираем лучшие раздельные потоки для максимального качества
+            'format': 'bestvideo+bestaudio/best' if mode == 'video' else 'bestaudio/best',
             'outtmpl': f'{self.download_path}/%(title).50s_%(id)s.%(ext)s',
             'noplaylist': True,
             'quiet': True,
             'no_warnings': True,
             'nocheckcertificate': True,
-            'ignoreerrors': False,
-            'logtostderr': False,
             'add_header': [
                 'User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
             ]
         }
 
-        # Postprocessors removed for local testing without FFmpeg
-        # They will be needed on the server, but for now we comment them out or disable
-        """
         if mode == 'audio':
             ydl_opts.update({
                 'postprocessors': [{
@@ -60,7 +55,6 @@ class Downloader:
                     'preferedformat': 'mp4',
                 }],
             })
-        """
 
         try:
             # We use run_in_executor because yt_dlp is synchronous
