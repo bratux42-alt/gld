@@ -72,12 +72,16 @@ class Downloader:
             # We use run_in_executor because yt_dlp is synchronous
             info = await loop.run_in_executor(None, lambda: self._extract_info(url, ydl_opts))
             if not info:
+                logger.error(f"yt-dlp returned no info for {url}")
                 return None
             
             filename = self._get_filename(info, mode)
+            if not filename:
+                logger.error(f"Could not determine filename for {url}")
+                return None
             return filename
         except Exception as e:
-            logger.error(f"Error downloading {url}: {e}")
+            logger.error(f"CRITICAL Error downloading {url}: {e}", exc_info=True)
             return None
 
     def _extract_info(self, url, opts):

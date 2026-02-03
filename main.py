@@ -329,6 +329,12 @@ async def process_download(callback: types.CallbackQuery):
             file_path = await downloader.download(url, mode=mode)
             
             if file_path and os.path.exists(file_path):
+                # На Zeabur иногда лучше проверять размер файла
+                if os.path.getsize(file_path) < 100:
+                    await callback.message.edit_text("❌ Ошибка: скачанный файл слишком мал или пуст. Возможно, защита YouTube заблокировала запрос.")
+                    os.remove(file_path)
+                    return
+
                 input_file = FSInputFile(file_path)
                 if mode == "video":
                     await bot.send_video(callback.message.chat.id, video=input_file)
@@ -340,10 +346,10 @@ async def process_download(callback: types.CallbackQuery):
                 await callback.message.delete()
                 os.remove(file_path)
             else:
-                await callback.message.edit_text("❌ Не удалось скачать файл. Попробуйте другую ссылку.")
+                await callback.message.edit_text("❌ Не удалось получить файл. YouTube/TikTok блокирует запросы с этого сервера. Попробуйте другую ссылку или позже.")
         except Exception as e:
             logging.error(f"Error in process_download: {e}")
-            await callback.message.edit_text(f"❌ Ошибка загрузки: {str(e)}")
+            await callback.message.edit_text(f"⚠️ Ошибка сервера: {str(e)[:100]}. Мы уже разбираемся!")
         finally:
             if msg_id in pending_downloads:
                 del pending_downloads[msg_id]
