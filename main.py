@@ -349,6 +349,8 @@ async def process_download(callback: types.CallbackQuery):
                 del pending_downloads[msg_id]
 
 async def main():
+    # Удаляем вебхук и все накопившиеся сообщения, чтобы избежать конфликтов при перезапуске
+    await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
