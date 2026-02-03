@@ -37,8 +37,20 @@ class Downloader:
             'nocheckcertificate': True,
             'add_header': [
                 'User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-            ]
+            ],
+            # Обход защиты YouTube (эмуляция разных клиентов)
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['ios', 'android', 'web'],
+                    'skip': ['dash', 'hls']
+                }
+            }
         }
+
+        # Если в папке бота есть файл cookies.txt, используем его для авторизации
+        if os.path.exists("cookies.txt"):
+            ydl_opts['cookiefile'] = 'cookies.txt'
+            logger.info("Using cookies.txt for authentication")
 
         if mode == 'audio':
             ydl_opts.update({
